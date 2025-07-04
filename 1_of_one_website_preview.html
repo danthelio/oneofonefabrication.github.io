@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1ofONE | Precision Metalworking & Welding</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: linear-gradient(to bottom, #263238 0%, #D2B48C 100%);
+            color: #ECEFF1;
+        }
+        .brand {
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .text-gradient {
+            background: linear-gradient(90deg, #FF6D00, #FFC107);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-gray-900 text-white p-4">
+        <div class="container mx-auto flex justify-between">
+            <div class="text-2xl brand">1of<span class="text-gradient">ONE</span></div>
+            <div class="space-x-4">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#portfolio">Portfolio</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="text-center py-20">
+        <h1 id="hero-title" class="text-5xl font-bold opacity-0 translate-y-6">FORGING <span class="text-gradient">EXCELLENCE</span></h1>
+        <p id="hero-subtitle" class="mt-4 text-xl opacity-0 translate-y-6">Precision metalworking and custom welding solutions.</p>
+        <a id="hero-button" href="#contact" class="mt-6 inline-block bg-orange-600 text-white px-6 py-3 rounded opacity-0 translate-y-6">Start Your Project</a>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="bg-gray-800 text-white py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-6">OUR <span class="text-gradient">MISSION</span></h2>
+            <p class="max-w-3xl mx-auto text-center">At 1ofONE, we combine traditional craftsmanship with cutting-edge technology to create unique metalworks, from functional structures to artistic installations.</p>
+        </div>
+    </section>
+
+    <!-- Portfolio Preview -->
+    <section id="portfolio" class="py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-6">OUR <span class="text-gradient">WORK</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <img src="https://via.placeholder.com/400x300" alt="Work Sample 1" class="rounded shadow">
+                <img src="https://via.placeholder.com/400x300" alt="Work Sample 2" class="rounded shadow">
+                <img src="https://via.placeholder.com/400x300" alt="Work Sample 3" class="rounded shadow">
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="bg-gray-900 text-white py-20">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-6">GET IN <span class="text-gradient">TOUCH</span></h2>
+            <p class="text-center mb-6">Email: info@1ofone.com | Phone: (555) 123-4567</p>
+            <form class="max-w-xl mx-auto">
+                <input type="text" placeholder="Name" class="w-full p-3 mb-4 rounded bg-gray-800 border border-gray-700">
+                <input type="email" placeholder="Email" class="w-full p-3 mb-4 rounded bg-gray-800 border border-gray-700">
+                <textarea placeholder="Your message" rows="4" class="w-full p-3 mb-4 rounded bg-gray-800 border border-gray-700"></textarea>
+                <button class="w-full bg-orange-600 text-white py-3 rounded">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-center text-gray-400 py-6">
+        <p>&copy; 2025 1ofONE. All rights reserved.</p>
+    </footer>
+
+    <!-- GSAP Hero Animation -->
+    <script>
+        window.addEventListener('load', () => {
+            gsap.to("#hero-title", {opacity: 1, y: 0, duration: 1, delay: 0.2});
+            gsap.to("#hero-subtitle", {opacity: 1, y: 0, duration: 1, delay: 0.5});
+            gsap.to("#hero-button", {opacity: 1, y: 0, duration: 1, delay: 0.8});
+        });
+    </script>
+</body>
+</html>
