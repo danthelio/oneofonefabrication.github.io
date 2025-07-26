@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1ofONE | Precision Metalworking & Welding</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto:wght@300;400;700&display=swap');
+        
+        :root {
+            --primary: #FF6D00;
+            --secondary: #37474F;
+            --dark: #263238;
+            --tan: #D2B48C;
+            --light: #ECEFF1;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to bottom, var(--dark) 0%, var(--tan) 100%);
+            background-attachment: fixed;
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, .brand {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .brand {
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+        }
+        
+        .section {
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .overlay {
+            background: rgba(38, 50, 56, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .card {
+            background: rgba(38, 50, 56, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 109, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 109, 0, 0.8);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #ff8f00;
+            transform: translateY(-2px);
+        }
+        
+        .spark {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px #FF6D00;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .portfolio-item {
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .portfolio-item img {
+            transition: transform 0.5s ease;
+        }
+        
+        .portfolio-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .portfolio-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            width: 100%;
+            height: 0;
+            transition: .5s ease;
+        }
+        
+        .portfolio-item:hover .portfolio-overlay {
+            height: 100%;
+        }
+        
+        .text-gradient {
+            background: linear-gradient(90deg, #FF6D00, #FFC107);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff8f00;
+        }
+        
+        /* Loading overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s ease;
+        }
+        
+        .loader {
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+        
+        .loader:before, .loader:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: var(--primary);
+            opacity: 0.6;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .loader:after {
+            animation-delay: -1s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(0);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Animated text */
+        .animated-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .animated-text::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease-out;
+        }
+
+        .animated-text:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="loader"></div>
+    </div>
+
+    <!-- 3D Background Canvas -->
+    <div id="canvas-container"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-opacity-80 bg-gray-900 backdrop-filter backdrop-blur-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#" class="flex items-center">
+                    <div class="text-3xl brand">
+                        <span class="text-white">1of</span><span class="text-primary" style="color: #FF6D00;">ONE</span>
+                    </div>
+                </a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-gray-300 hover:text-white animated-text">Home</a>
+                    <a href="#about" class="text-gray-300 hover:text-white animated-text">About</a>
+                    <a href="#portfolio" class="text-gray-300 hover:text-white animated-text">Portfolio</a>
+                    <a href="#contact" class="text-gray-300 hover:text-white animated-text">Contact</a>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                    <i class="fas fa-bars text-white text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-900 bg-opacity-95 backdrop-filter backdrop-blur-lg">
+            <div class="container mx-auto px-4 py-3">
+                <a href="#home" class="block py-2 text-gray-300 hover:text-white">Home</a>
+                <a href="#about" class="block py-2 text-gray-300 hover:text-white">About</a>
+                <a href="#portfolio" class="block py-2 text-gray-300 hover:text-white">Portfolio</a>
+                <a href="#contact" class="block py-2 text-gray-300 hover:text-white">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="section flex items-center justify-center min-h-screen">
+        <div class="container mx-auto px-4 py-24 text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 opacity-0" id="hero-title">
+                FORGING <span class="text-gradient">EXCELLENCE</span>
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 opacity-0 max-w-2xl mx-auto" id="hero-subtitle">
+                Precision metalworking and custom welding solutions that transform ideas into industrial art.
+            </p>
+            <div class="opacity-0" id="hero-btn">
+                <a href="#contact" class="btn-primary px-8 py-3 rounded-lg text-lg font-semibold inline-block">
+                    Start Your Project
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section py-20 overflow-hidden">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">OUR <span class="text-gradient">MISSION</span></h2>
+                <div class="h-1 w-20 bg-gradient-to-r from-yellow-500 to-red-500 mx-auto"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                <div class="about-text">
+                    <h3 class="text-2xl font-semibold mb-4">Craftsmanship Meets Innovation</h3>
+                    <p class="text-gray-300 mb-6">
+                        At 1ofONE, we believe that metalworking is both an ancient craft and a modern art form. Our team of master welders and metalworkers combines traditional techniques with cutting-edge technology to create pieces that are truly one-of-a-kind.
+                    </p>
+                    <p class="text-gray-300 mb-6">
+                        Whether you're looking for industrial solutions, architectural elements, or custom art installations, we approach each project with the same dedication to excellence and attention to detail.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 mt-8">
+                        <div class="card p-5 rounded-lg">
+                            <i class="fas fa-fire text-4xl text-primary mb-3" style="color: #FF6D00;"></i>
+                            <h4 class="text-xl font-semibold mb-2">Precision Welding</h4>
+                            <p class="text-sm text-gray-400">Expert TIG, MIG, and stick welding for all materials.</p>
+                        </div>
+                        <div class="card p-5 rounded-lg">
+                            <i class="fas fa-cogs text-4xl text-primary mb-3" style="color: #FF6D00;"></i>
+                            <h4 class="text-xl font-semibold mb-2">Custom Fabrication</h4>
+                            <p class="text-sm text-gray-400">Bespoke metalwork crafted to your exact specifications.</p>
+                        </div>
+                        <div class="card p-5 rounded-lg">
+                            <i class="fas fa-drafting-compass text-4xl text-primary mb-3" style="color: #FF6D00;"></i>
+                            <h4 class="text-xl font-semibold mb-2">Design Services</h4>
+                            <p class="text-sm text-gray-400">Collaborative design process to bring your vision to life.</p>
+                        </div>
+                        <div class="card p-5 rounded-lg">
+                            <i class="fas fa-tools text-4xl text-primary mb-3" style="color: #FF6D00;"></i>
+                            <h4 class="text-xl font-semibold mb-2">Repairs & Restoration</h4>
+                            <p class="text-sm text-gray-400">Giving new life to damaged or aging metal structures.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg transform rotate-3 scale-105 opacity-30 blur-md"></div>
+                        <img src="/api/placeholder/600/400" alt="Metalworker in action" class="relative z-10 rounded-lg shadow-xl w-full">
+                        <div class="absolute -bottom-4 -right-4 bg-gray-900 p-4 rounded shadow-lg z-20">
+                            <p class="text-3xl font-bold text-primary" style="color: #FF6D00;">15+</p>
+                            <p class="text-sm text-gray-400">Years Experience</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="section py-20 bg-gray-900 bg-opacity-70">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">OUR <span class="text-gradient">WORK</span></h2>
+                <div class="h-1 w-20 bg-gradient-to-r from-yellow-500 to-red-500 mx-auto"></div>
+                <p class="max-w-2xl mx-auto mt-4 text-gray-300">
+                    Explore our portfolio of custom metalwork and welding projects, showcasing our versatility and commitment to quality.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Portfolio Item 1 -->
+                <div class="portfolio-item rounded-lg overflow-hidden shadow-lg">
+                    <img src="/api/placeholder/400/300" alt="Metal sculpture" class="w-full h-64 object-cover">
+                    <div class="portfolio-overlay flex items-center justify-center flex-col p-4">
+                        <h3 class="text-xl font-bold text-white mb-2">Architectural Railing</h3>
+                        <p class="text-gray-300 text-center">Custom stainless steel railing with geometric pattern.</p>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Item 2 -->
+                <div class="portfolio-item rounded-lg overflow-hidden shadow-lg">
+                    <img src="/api/placeholder/400/300" alt="Industrial welding" class="w-full h-64 object-cover">
+                    <div class="portfolio-overlay flex items-center justify-center flex-col p-4">
+                        <h3 class="text-xl font-bold text-white mb-2">Industrial Equipment</h3>
+                        <p class="text-gray-300 text-center">Specialized fabrication for manufacturing facility.</p>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Item 3 -->
+                <div class="portfolio-item rounded-lg overflow-hidden shadow-lg">
+                    <img src="/api/placeholder/400/300" alt="Metal art" class="w-full h-64 object-cover">
+                    <div class="portfolio-overlay flex items-center justify-center flex-col p-4">
+                        <h3 class="text-xl font-bold text-white mb-2">Decorative Sculpture</h3>
+                        <p class="text-gray-300 text-center">Modern art installation for corporate headquarters.</p>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Item 4 -->
+                <div class="portfolio-item rounded-lg overflow-hidden shadow-lg">
+                    <img src="/api/placeholder/400/300" alt="Custom fabrication" class="w-full h-64 object-cover">
+                    <div class="portfolio-overlay flex items center justify-center flex-col p-4">
+                        <h3 class="text-xl font-bold text-white mb-2">Structural Support</h3>
+                        <p class="text-gray-300 text-center">Reinforced steel framework for historic building renovation.</p>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Item 5 -->
+                <div class="portfolio-item rounded-lg overflow-hidden shadow-lg">
+                    <img src="/api/placeholder/400/300" alt="Metal furniture" class="w-full h-64 object-cover">
+                    <div class="portfolio-overlay flex items-center justify-center flex-col p-4">
+                        <h3 class="text-xl font-bold text-white mb-2">Custom Furniture</h3>
+                        <p class="text-gray-300 text-center">Bespoke steel and wood conference table.</p>
+                    </div>
+                </div>
+                
+                <!-- Portfolio Item 6 -->
+                <div class="portfolio-item rounded-lg overflow-hidden shadow-lg">
+                    <img src="/api/placeholder/400/300" alt="Metal gate" class="w-full h-64 object-cover">
+                    <div class="portfolio-overlay flex items-center justify-center flex-col p-4">
+                        <h3 class="text-xl font-bold text-white mb-2">Security Gate</h3>
+                        <p class="text-gray-300 text-center">Decorative yet secure entrance gate for residential estate.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="btn-primary px-6 py-3 rounded-lg text-lg font-semibold inline-block">
+                    View Full Portfolio
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section py-20">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">GET IN <span class="text-gradient">TOUCH</span></h2>
+                <div class="h-1 w-20 bg-gradient-to-r from-yellow-500 to-red-500 mx-auto"></div>
+                <p class="max-w-2xl mx-auto mt-4 text-gray-300">
+                    Ready to start your project? Contact us today for a consultation and free quote.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="contact-info">
+                    <div class="card p-8 rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-6">Contact Information</h3>
+                        
+                        <div class="flex items-start mb-6">
+                            <div class="text-primary mr-4" style="color: #FF6D00;">
+                                <i class="fas fa-map-marker-alt text-2xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">Our Workshop</h4>
+                                <p class="text-gray-400">123 Industrial Way, Metalville, NY 12345</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start mb-6">
+                            <div class="text-primary mr-4" style="color: #FF6D00;">
+                                <i class="fas fa-phone text-2xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">Phone</h4>
+                                <p class="text-gray-400">(555) 123-4567</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start mb-6">
+                            <div class="text-primary mr-4" style="color: #FF6D00;">
+                                <i class="fas fa-envelope text-2xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">Email</h4>
+                                <p class="text-gray-400">info@1ofone.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="text-primary mr-4" style="color: #FF6D00;">
+                                <i class="fas fa-clock text-2xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">Working Hours</h4>
+                                <p class="text-gray-400">Mon - Fri: 8:00 AM - 6:00 PM</p>
+                                <p class="text-gray-400">Saturday: 9:00 AM - 2:00 PM</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8">
+                            <h4 class="font-semibold mb-3">Follow Us</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center transition duration-300 hover:bg-primary" style="hover:background-color: #FF6D00;">
+                                    <i class="fab fa-instagram text-white"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center transition duration-300 hover:bg-primary" style="hover:background-color: #FF6D00;">
+                                    <i class="fab fa-facebook-f text-white"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center transition duration-300 hover:bg-primary" style="hover:background-color: #FF6D00;">
+                                    <i class="fab fa-twitter text-white"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center transition duration-300 hover:bg-primary" style="hover:background-color: #FF6D00;">
+                                    <i class="fab fa-linkedin-in text-white"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <div class="card p-8 rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-6">Send Us a Message</h3>
+                        <form id="contact-form">
+                            <div class="mb-4">
+                                <label for="name" class="block text-gray-400 mb-2">Your Name</label>
+                                <input type="text" id="name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary" style="focus:border-color: #FF6D00;">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="email" class="block text-gray-400 mb-2">Your Email</label>
+                                <input type="email" id="email" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary" style="focus:border-color: #FF6D00;">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="phone" class="block text-gray-400 mb-2">Phone Number</label>
+                                <input type="tel" id="phone" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary" style="focus:border-color: #FF6D00;">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="project" class="block text-gray-400 mb-2">Project Type</label>
+                                <select id="project" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary" style="focus:border-color: #FF6D00;">
+                                    <option value="">Select Project Type</option>
+                                    <option value="custom_fabrication">Custom Fabrication</option>
+                                    <option value="architectural">Architectural Elements</option>
+                                    <option value="art">Metal Art & Sculpture</option>
+                                    <option value="industrial">Industrial Solutions</option>
+                                    <option value="repair">Repair & Restoration</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label for="message" class="block text-gray-400 mb-2">Your Message</label>
+                                <textarea id="message" rows="5" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary" style="focus:border-color: #FF6D00;"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary w-full py-3 rounded-lg text-lg font-semibold">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="text-3xl brand mb-2">
+                        <span class="text-white">1of</span><span class="text-primary" style="color: #FF6D00;">ONE</span>
+                    </div>
+                    <p class="text-gray-400">Precision Metalworking & Welding</p>
+                </div>
+                
+                <div class="text-center md:text-right">
+                    <p class="text-gray-400">© 2025 1ofONE. All rights reserved.</p>
+                    <div class="flex justify-center md:justify-end space-x-4 mt-2">
+                        <a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a>
+                        <a href="#" class="text-gray-400 hover:text-white">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white opacity-0 invisible transition-all duration-300" style="background-color: #FF6D00;">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script>
+        // Wait for the page to load
+        window.addEventListener('load', function() {
+            // Hide the loading overlay
+            setTimeout(() => {
+                const loadingOverlay = document.getElementById('loading-overlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                    }, 1000);
+                }
+            }, 1500);
+            
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+            
+            // Back to top button
+            const backToTopButton = document.getElementById('back-to-top');
+            
+            if (backToTopButton) {
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset > 300) {
+                        backToTopButton.classList.remove('opacity-0', 'invisible');
+                        backToTopButton.classList.add('opacity-100', 'visible');
+                    } else {
+                        backToTopButton.classList.remove('opacity-100', 'visible');
+                        backToTopButton.classList.add('opacity-0', 'invisible');
+                    }
+                });
+                
+                backToTopButton.addEventListener('click', function() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+            
+            // Animate hero elements with GSAP
+            gsap.to('#hero-title', {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                delay: 0.5
+            });
+            
+            gsap.to('#hero-subtitle', {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                delay: 0.8
+            });
+            
+            gsap.to('#hero-btn', {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                delay: 1.1
+            });
+            
+            // Create sparks effect on mouse move
+            document.addEventListener('mousemove', createSparks);
+            
+            function createSparks(e) {
+                // Only create sparks occasionally
+                if (Math.random() > 0.95) {
+                    const spark = document.createElement('div');
+                    spark.classList.add('spark');
+                    
+                    // Position at mouse location
+                    spark.style.left = `${e.pageX}px`;
+                    spark.style.top = `${e.pageY}px`;
+                    
+                    // Random size
+                    const size = Math.random() * 4 + 2;
+                    spark.style.width = `${size}px`;
+                    spark.style.height = `${size}px`;
+                    
+                    // Random color (orange/yellow)
+                    const hue = Math.floor(Math.random() * 30) + 20; // 20-50 (orange-yellow)
+                    spark.style.backgroundColor = `hsl(${hue}, 100%, 60%)`;
+                    spark.style.boxShadow = `0 0 ${size * 3}px ${size}px hsl(${hue}, 100%, 60%)`;
+                    
+                    document.body.appendChild(spark);
+                    
+                    // Animate the spark
+                    const angle = Math.random() * Math.PI * 2;
+                    const velocity = Math.random() * 60 + 30;
+                    const lifetime = Math.random() * 1000 + 500;
+                    
+                    let posX = e.pageX;
+                    let posY = e.pageY;
+                    
+                    const fadeAndMove = () => {
+                        posX += Math.cos(angle) * 2;
+                        posY += Math.sin(angle) * 2 - 3; // Slight upward bias
+                        
+                        spark.style.left = `${posX}px`;
+                        spark.style.top = `${posY}px`;
+                        
+                        spark.style.opacity = spark.style.opacity ? parseFloat(spark.style.opacity) - 0.03 : 1;
+                        
+                        if (parseFloat(spark.style.opacity) <= 0) {
+                            spark.remove();
+                        } else {
+                            requestAnimationFrame(fadeAndMove);
+                        }
+                    };
+                    
+                    fadeAndMove();
+                    
+                    // Remove after lifetime
+                    setTimeout(() => {
+                        if (document.body.contains(spark)) {
+                            spark.remove();
+                        }
+                    }, lifetime);
+                }
+            }
+            
+            // Smooth scroll for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        // Close mobile menu if it's open
+                        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                        
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 70, // Account for fixed header
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Contact form handling
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Simple form validation
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const message = document.getElementById('message').value;
+                    
+                    if (!name || !email || !message) {
+                        alert('Please fill out all required fields.');
+                        return;
+                    }
+                    
+                    // Simulate form submission
+                    const submitButton = contactForm.querySelector('button[type="submit"]');
+                    const originalText = submitButton.innerHTML;
+                    
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
+                    submitButton.disabled = true;
+                    
+                    // Simulate API call
+                    setTimeout(() => {
+                        submitButton.innerHTML = '<i class="fas fa-check mr-2"></i> Message Sent!';
+                        submitButton.disabled = false;
+                        
+                        // Reset form
+                        contactForm.reset();
+                        
+                        // Reset button after delay
+                        setTimeout(() => {
+                            submitButton.innerHTML = originalText;
+                        }, 3000);
+                    }, 1500);
+                });
+            }
+            
+            // Initialize 3D background with Three.js
+            initThreeJsBackground();
+        });
+        
+        // Three.js background
+        function initThreeJsBackground() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+            
+            // Initialize Three.js scene
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+            
+            // Create a group to hold our particles
+            const particlesGroup = new THREE.Group();
+            scene.add(particlesGroup);
+            
+            // Create particles
+            const particleCount = 1000;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            
+            // Arrays to store particle velocities and custom attributes
+            const velocities = [];
+            const particleData = [];
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Position
+                const x = (Math.random() - 0.5) * 20;
+                const y = (Math.random() - 0.5) * 20;
+                const z = (Math.random() - 0.5) * 20 - 10; // Push particles back in z-space
+                
+                positions[i * 3] = x;
+                positions[i * 3 + 1] = y;
+                positions[i * 3 + 2] = z;
+                
+                // Color (orange/yellow gradient)
+                const r = Math.random() * 0.5 + 0.5; // 0.5-1.0
+                const g = Math.random() * 0.3 + 0.2; // 0.2-0.5
+                const b = Math.random() * 0.1;       // 0-0.1
+                
+                colors[i * 3] = r;
+                colors[i * 3 + 1] = g;
+                colors[i * 3 + 2] = b;
+                
+                // Random velocity for each particle
+                velocities.push({
+                    x: (Math.random() - 0.5) * 0.02,
+                    y: (Math.random() - 0.5) * 0.02,
+                    z: (Math.random() - 0.5) * 0.02
+                });
+                
+                // Custom attributes for each particle
+                particleData.push({
+                    oscillationSpeed: Math.random() * 0.02 + 0.01,
+                    oscillationDistance: Math.random() * 0.2 + 0.1,
+                    originalY: y,
+                    originalX: x,
+                    originalZ: z,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+            
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            // Material for particles - adding size attenuation for depth effect
+            const particleMaterial = new THREE.PointsMaterial({
+                size: 0.05,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true
+            });
+            
+            // Create particle system
+            const particleSystem = new THREE.Points(particles, particleMaterial);
+            particlesGroup.add(particleSystem);
+            
+            // Add some larger glowing points
+            const glowGeometry = new THREE.BufferGeometry();
+            const glowPositions = new Float32Array(50 * 3);
+            const glowColors = new Float32Array(50 * 3);
+            
+            // Arrays for glow point velocity and attributes
+            const glowVelocities = [];
+            const glowData = [];
+            
+            for (let i = 0; i < 50; i++) {
+                const x = (Math.random() - 0.5) * 15;
+                const y = (Math.random() - 0.5) * 15;
+                const z = (Math.random() - 0.5) * 15 - 5;
+                
+                glowPositions[i * 3] = x;
+                glowPositions[i * 3 + 1] = y;
+                glowPositions[i * 3 + 2] = z;
+                
+                // Brighter orange/yellow
+                const r = 1.0;
+                const g = Math.random() * 0.5 + 0.5;
+                const b = Math.random() * 0.2;
+                
+                glowColors[i * 3] = r;
+                glowColors[i * 3 + 1] = g;
+                glowColors[i * 3 + 2] = b;
+                
+                // Slower, more deliberate movement for glow points
+                glowVelocities.push({
+                    x: (Math.random() - 0.5) * 0.01,
+                    y: (Math.random() - 0.5) * 0.01,
+                    z: (Math.random() - 0.5) * 0.01
+                });
+                
+                // Custom attributes for each glow point
+                glowData.push({
+                    oscillationSpeed: Math.random() * 0.01 + 0.005,
+                    oscillationDistance: Math.random() * 0.4 + 0.2,
+                    originalY: y,
+                    originalX: x,
+                    originalZ: z,
+                    phase: Math.random() * Math.PI * 2,
+                    pulsateSpeed: Math.random() * 0.02 + 0.01
+                });
+            }
+            
+            glowGeometry.setAttribute('position', new THREE.BufferAttribute(glowPositions, 3));
+            glowGeometry.setAttribute('color', new THREE.BufferAttribute(glowColors, 3));
+            
+            const glowMaterial = new THREE.PointsMaterial({
+                size: 0.2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                sizeAttenuation: true,
+                blending: THREE.AdditiveBlending // Add glow effect
+            });
+            
+            const glowSystem = new THREE.Points(glowGeometry, glowMaterial);
+            particlesGroup.add(glowSystem);
+            
+            // Position camera
+            camera.position.z = 5;
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Update regular particles
+                const positions = particles.attributes.position.array;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    // Get particle data
+                    const pData = particleData[i];
+                    const velocity = velocities[i];
+                    
+                    // Update phase
+                    pData.phase += pData.oscillationSpeed;
+                    
+                    // Calculate new position with combined movement types:
+                    // 1. Constant drift (velocity)
+                    // 2. Sine wave oscillation
+                    // 3. Slight attraction toward original position (orbit-like behavior)
+                    
+                    // Apply sine wave oscillation
+                    const oscillationX = Math.sin(pData.phase) * pData.oscillationDistance;
+                    const oscillationY = Math.cos(pData.phase) * pData.oscillationDistance;
+                    
+                    // Get current position
+                    let x = positions[i * 3];
+                    let y = positions[i * 3 + 1];
+                    let z = positions[i * 3 + 2];
+                    
+                    // Apply velocity (drift)
+                    x += velocity.x;
+                    y += velocity.y;
+                    z += velocity.z;
+                    
+                    // Apply oscillation
+                    x += oscillationX;
+                    y += oscillationY;
+                    
+                    // Apply subtle attraction back to original position (creates orbit-like movement)
+                    x += (pData.originalX - x) * 0.01;
+                    y += (pData.originalY - y) * 0.01;
+                    z += (pData.originalZ - z) * 0.01;
+                    
+                    // Boundaries check - if too far from origin, reset velocity slightly inward
+                    const distance = Math.sqrt(x*x + y*y + z*z);
+                    if (distance > 15) {
+                        velocity.x -= x * 0.001;
+                        velocity.y -= y * 0.001;
+                        velocity.z -= z * 0.001;
+                    }
+                    
+                    // Update position
+                    positions[i * 3] = x;
+                    positions[i * 3 + 1] = y;
+                    positions[i * 3 + 2] = z;
+                }
+                particles.attributes.position.needsUpdate = true;
+                
+                // Update glow particles
+                const glowPositions = glowGeometry.attributes.position.array;
+                
+                for (let i = 0; i < 50; i++) {
+                    // Get glow data
+                    const gData = glowData[i];
+                    const velocity = glowVelocities[i];
+                    
+                    // Update phase
+                    gData.phase += gData.oscillationSpeed;
+                    
+                    // Get current position
+                    let x = glowPositions[i * 3];
+                    let y = glowPositions[i * 3 + 1];
+                    let z = glowPositions[i * 3 + 2];
+                    
+                    // Apply more complex movement for glow points
+                    // Combine drift, oscillation, and circular motion
+                    x += velocity.x;
+                    y += velocity.y + Math.sin(gData.phase) * gData.oscillationDistance;
+                    z += velocity.z + Math.cos(gData.phase) * gData.oscillationDistance * 0.5;
+                    
+                    // Create a slow-revolving orbit effect around the original position
+                    const orbitX = Math.sin(gData.phase * 0.3) * 0.5;
+                    const orbitZ = Math.cos(gData.phase * 0.3) * 0.5;
+                    
+                    x += orbitX;
+                    z += orbitZ;
+                    
+                    // Stronger return to origin for glow points (tighter orbits)
+                    x += (gData.originalX - x) * 0.02;
+                    y += (gData.originalY - y) * 0.02;
+                    z += (gData.originalZ - z) * 0.02;
+                    
+                    // Update position
+                    glowPositions[i * 3] = x;
+                    glowPositions[i * 3 + 1] = y;
+                    glowPositions[i * 3 + 2] = z;
+                    
+                    // Pulsate glow point size
+                    if (i % 2 === 0) { // Only apply to half the points for variety
+                        glowMaterial.size = 0.2 + Math.sin(Date.now() * gData.pulsateSpeed) * 0.05;
+                    }
+                }
+                glowGeometry.attributes.position.needsUpdate = true;
+                
+                // Also maintain some overall group rotation for cohesion
+                particlesGroup.rotation.y += 0.0003;
+                particlesGroup.rotation.x += 0.0001;
+                
+                // Respond to mouse movement (subtly)
+                particlesGroup.rotation.x += (mouseY * 0.0001 - particlesGroup.rotation.x) * 0.03;
+                particlesGroup.rotation.y += (mouseX * 0.0001 - particlesGroup.rotation.y) * 0.03;
+                
+                renderer.render(scene, camera);
+            }
+            
+            // Track mouse position
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - window.innerWidth / 2);
+                mouseY = (event.clientY - window.innerHeight / 2);
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Start animation
+            animate();
+        }
+    </script>
+</body>
+</html>
